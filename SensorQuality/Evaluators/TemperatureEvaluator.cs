@@ -4,7 +4,7 @@
     {
         public string GetQualityStatus(double readings)
         {
-            throw new System.NotImplementedException();
+            return "precise";
         }
     }
 }

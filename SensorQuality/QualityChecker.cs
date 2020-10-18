@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using SensorQuality.Evaluators;
 using SensorQuality.Extensions;
 
@@ -8,14 +11,14 @@ namespace SensorQuality
     public class QualityChecker
     {
         private SensorEvaluationStrategy _sensorEvaluationStrategy;
-        private static object lockObj = new object();
+        private static readonly object _lockObj = new object();
 
         public string EvaluateLogFile(string logContentsStr)
         {
             if (string.IsNullOrWhiteSpace(logContentsStr))
                 throw new InvalidOperationException("File contents are invalid");
 
-            var sensorReadings = new ConcurrentDictionary<Sensor, double>();
+            var sensorReadingsAggregate = new ConcurrentDictionary<Sensor, double>();
             foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines())
             {
                 if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))
@@ -28,49 +31,37 @@ namespace SensorQuality
 
                 Sensor sensor = GetSensorDevice(line);
 
-                sensorReadings.AddOrUpdate(sensor, sensor.Reading,
+                sensorReadingsAggregate.AddOrUpdate(sensor, sensor.Reading,
                     (key, existingReading) => existingReading + sensor.Reading);
             }
 
-            string evaluationResult = EvaluateSensors(sensorReadings);
+            var evaluationResultMap = EvaluateSensors(sensorReadingsAggregate);
 
-            return string.Empty;
-        }
-
-        private SensorEvaluationStrategy BuildSensorEvaluationStrategy(ReadOnlySpan<char> line)
-        {
-            if(_sensorEvaluationStrategy != null)
-                throw new InvalidOperationException($"Sensor evaluation references already initialized. Duplicate reference line found {line.ToString()}");
-
-            if (_sensorEvaluationStrategy == null)
-            {
-                lock (lockObj)
+            return evaluationResultMap.IsEmpty
+                ? "Sensor Evaluation did not yield results. Reason Unknown."
+                : JsonSerializer.Serialize(evaluationResultMap, new JsonSerializerOptions
                 {
-                    _sensorEvaluationStrategy ??= new SensorEvaluationStrategy(line.ToString());
-                }
-            }
-
-            return _sensorEvaluationStrategy;
+                    WriteIndented = true
+                });
         }
 
-        private string EvaluateSensors(ConcurrentDictionary<Sensor, double> sensorReadings)
+        private ConcurrentDictionary<string, string> EvaluateSensors(ConcurrentDictionary<Sensor, double> sensorReadings)
         {
             if (_sensorEvaluationStrategy == null)
                 throw new InvalidOperationException("Could not instantiate strategy for evaluating the sensors. Missing/Invalid reference header line");
 
             var sensorsResult = new ConcurrentDictionary<string, string>();
 
-            foreach (var (sensor, readings) in sensorReadings)
+            foreach (var (sensor, readingsAggregate) in sensorReadings)
             {
                 IEvaluator evaluator = _sensorEvaluationStrategy.GetEvaluator(sensor.Type);
-                string evaluationResult = evaluator.GetQualityStatus(readings);
+                string evaluationResult = evaluator.GetQualityStatus(readingsAggregate);
                 sensorsResult.TryAdd(sensor.Name, evaluationResult);
             }
 
-            return string.Empty;
+            return sensorsResult;
         }
-
-
+        
         private static Sensor GetSensorDevice(in ReadOnlySpan<char> line)
         {
             //temp temp-1 2007-04-05T22:00 72.4
@@ -88,26 +79,21 @@ namespace SensorQuality
             return sensorInfo;
         }
 
-        //public string EvaluateLogFile(string logContentsStr)
-        //{
-        //    if (string.IsNullOrWhiteSpace(logContentsStr))
-        //        throw new InvalidOperationException("File contents are invalid");
+        private SensorEvaluationStrategy BuildSensorEvaluationStrategy(ReadOnlySpan<char> line)
+        {
+            if (_sensorEvaluationStrategy != null)
+                throw new InvalidOperationException(
+                    $"Sensor evaluation references already initialized. Duplicate reference line found {line.ToString()}");
 
-        //    string referenceLine;
-        //    using (var reader = new StringReader(logContentsStr))
-        //    {
-        //        referenceLine = reader.ReadLine();
-        //    }
+            if (_sensorEvaluationStrategy == null)
+            {
+                lock (_lockObj)
+                {
+                    _sensorEvaluationStrategy ??= new SensorEvaluationStrategy(line.ToString());
+                }
+            }
 
-        //    if (string.IsNullOrWhiteSpace(referenceLine))
-        //        throw new InvalidOperationException("Could not find reference values for the sensors");
-
-        //    _sensorReferenceMap.Load(referenceLine);
-
-
-
-
-        //    return string.Empty;
-        //}
+            return _sensorEvaluationStrategy;
+        }
     }
 }
