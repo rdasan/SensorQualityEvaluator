@@ -10,7 +10,7 @@ namespace SensorQuality
     public class QualityChecker
     {
         private SensorEvaluationStrategy _sensorEvaluationStrategy;
-        private static readonly object _lockObj = new object();
+        private static readonly object s_lockObj = new object();
 
         public string EvaluateLogFile(string logContentsStr)
         {
@@ -29,7 +29,7 @@ namespace SensorQuality
                     continue;
                 }
 
-                Sensor sensor = GetSensorDevice(line);
+                Sensor sensor = GetSensor(line);
 
                 sensorReadingsMap.AddReading(sensor, sensor.Reading);
             }
@@ -44,7 +44,7 @@ namespace SensorQuality
                 });
         }
 
-        private ConcurrentDictionary<string, string> EvaluateSensors(SensorReadingsMap sensorReadingsMap)
+        private  ConcurrentDictionary<string, string> EvaluateSensors(SensorReadingsMap sensorReadingsMap)
         {
             if (_sensorEvaluationStrategy == null)
                 throw new InvalidOperationException("Could not instantiate strategy for evaluating the sensors. Missing/Invalid reference header line");
@@ -61,7 +61,7 @@ namespace SensorQuality
             return sensorsResult;
         }
         
-        private static Sensor GetSensorDevice(in ReadOnlySpan<char> line)
+        private static Sensor GetSensor(in ReadOnlySpan<char> line)
         {
             //temp temp-1 2007-04-05T22:00 72.4
             var logLine = line.ToString();
@@ -72,6 +72,9 @@ namespace SensorQuality
                 Type = parts[0],
                 Name = parts[1]
             };
+
+            //We don't care about the date part . So discarding that
+
             if (double.TryParse(parts[3], out double reading))
                 sensorInfo.Reading = reading;
 
@@ -86,7 +89,7 @@ namespace SensorQuality
 
             if (_sensorEvaluationStrategy == null)
             {
-                lock (_lockObj)
+                lock (s_lockObj)
                 {
                     _sensorEvaluationStrategy ??= new SensorEvaluationStrategy(line.ToString());
                 }
