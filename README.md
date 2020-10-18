@@ -2,11 +2,14 @@
 
 ## Problem Statement
 
-Process the log file and automate the quality control evaluation based on pre-defined criteria in a controlled environment
+Process the log file and automate the quality control evaluation based on pre-defined criteria in a controlled environment  
+
+---
 
 ## Design Changes made in consideration of **Extendablity**, **Maintainablity** and **Distributed Modeling**
 
-### I made the following changes to the format of the log file
+- The interface method name changed from **EvaluateLogFile**  -> **EvaluateLogFileContents**
+- The following changes made to the format of the log file
 
 ```
 reference temp:70.0 hum:45.0 mon:6
@@ -56,17 +59,27 @@ hum hum-2 2007-04-05T22:06 44.9
    
 
 
-    > In the sample input provided in the problem statement, if one of the lines `[<type> > <name>]` goes missing, the entire evaluation for the sensors would go wrong
+    > In the sample input provided in the problem statement, if one of the lines `[<type> > <name>]` goes missing, the entire evaluation for the sensors would go wrong  
     
 ---
 
->**IMP: Since there is no importance given to order, the output printed would have the correct JSON format and evalution results but would not follow any particular order**
+>## **IMP**:  
+>**Since there is no importance given to order, the output printed would have the correct JSON format and evalution results but would not follow any particular order**  
 ---
 
 ## 3rd Party Components Used (Why reinvent the wheel? :) )
 
 - MathNet.Numerics nuget package (https://numerics.mathdotnet.com/)
 - Extremely fast processing, and better memory performance string extension **SplitLines()** 
-  -  The inbuilt string.Split() method uses pattern matching using regex which makes is slow for the specific scenario we have here where we just want to split into separate lines (pre-known separator '\r' '\n'). string.Split() also leads to a lot of allocations when the result is used in a foreach loop. Using the new ReadOnlySpan, we can avoid allocations and make the operation much faster by providing a enumerator. \
+  -  The inbuilt string.Split() method uses pattern matching using regex which makes is slow for the specific scenario we have here where we just want to split into separate lines (pre-known separator '\r' '\n'). string.Split() also leads to a lot of allocations when the result is used in a foreach loop. Using the new ReadOnlySpan, we can avoid allocations and make the operation much faster by providing a enumerator.  
   Ref: https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm
-  - The enumeration on the result of SplitLines() is a ReadOnlySpan`<char`> which can be evaluted lazily as per need. So no pre-allocation of memory.
+  - The enumeration on the result of SplitLines() is a ReadOnlySpan`<char`> which can be evaluted lazily as per need. So no pre-allocation of memory.  
+
+## Assumptions:
+- The first line of the logContents is always the reference line
+- There is only 1 reference line per sample input
+- During calculations 'within' is inclusive of the threshold value  
+
+## Areas of improvement
+- The threshold values for fault tolerance, standard deviation etc. can be moved to a config file and read from there instaed of hardcoded values
+- The performance for evaluating the "Humidistats" and "CO Detectors" can be further improved. Right now all the readings of a particular humidistat or CO detector are being read into memory and then evaluated. But that can be avoided by doing inline evalution for those readings as they are being read and stop processing the readings as soon as a deviation from threshold is encountered.
