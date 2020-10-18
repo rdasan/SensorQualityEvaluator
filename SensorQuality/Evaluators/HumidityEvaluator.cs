@@ -11,6 +11,7 @@
 
         public string GetQualityStatus(double readings)
         {
+            //ToDo: Do the actual math evaluation
             return "discard";
         }
     }
