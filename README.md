@@ -14,36 +14,36 @@ temp temp-1 2007-04-05T22:00 72.4
 temp temp-1 2007-04-05T22:01 76.0
 temp temp-1 2007-04-05T22:02 79.1
 temp temp-1 2007-04-05T22:03 75.6
+hum hum-1 2007-04-05T22:05 45.3
+hum hum-1 2007-04-05T22:06 45.1
 temp temp-1 2007-04-05T22:04 71.2
+temp temp-2 2007-04-05T22:02 70.1
+temp temp-2 2007-04-05T22:03 71.3
 temp temp-1 2007-04-05T22:05 71.4
 temp temp-1 2007-04-05T22:06 69.2
 temp temp-1 2007-04-05T22:07 65.2
+mon mon-2 2007-04-05T22:07 8
 temp temp-1 2007-04-05T22:08 62.8
 temp temp-1 2007-04-05T22:09 61.4
+mon mon-2 2007-04-05T22:08 6
 temp temp-1 2007-04-05T22:10 64.0
 temp temp-1 2007-04-05T22:11 67.5
-temp temp-1 2007-04-05T22:12 69.4
-temp temp-2 2007-04-05T22:01 69.5
-temp temp-2 2007-04-05T22:02 70.1
-temp temp-2 2007-04-05T22:03 71.3
-temp temp-2 2007-04-05T22:04 71.5
-temp temp-2 2007-04-05T22:05 69.8
-hum hum-1 2007-04-05T22:04 45.2
-hum hum-1 2007-04-05T22:05 45.3
-hum hum-1 2007-04-05T22:06 45.1
-hum hum-2 2007-04-05T22:04 44.4
-hum hum-2 2007-04-05T22:05 43.9
-hum hum-2 2007-04-05T22:06 44.9
-hum hum-2 2007-04-05T22:07 43.8
-hum hum-2 2007-04-05T22:08 42.1
-mon mon-1 2007-04-05T22:04 5
 mon mon-1 2007-04-05T22:05 7
 mon mon-1 2007-04-05T22:06 9
 mon mon-2 2007-04-05T22:04 2
+temp temp-1 2007-04-05T22:12 69.4
+temp temp-2 2007-04-05T22:01 69.5
+temp temp-2 2007-04-05T22:05 69.8
+hum hum-1 2007-04-05T22:04 45.2
+hum hum-2 2007-04-05T22:04 44.4
+hum hum-2 2007-04-05T22:07 43.8
+hum hum-2 2007-04-05T22:08 42.1
+mon mon-1 2007-04-05T22:04 5
 mon mon-2 2007-04-05T22:05 4
 mon mon-2 2007-04-05T22:06 10
-mon mon-2 2007-04-05T22:07 8
-mon mon-2 2007-04-05T22:08 6
+temp temp-2 2007-04-05T22:04 71.5
+hum hum-2 2007-04-05T22:05 43.9
+hum hum-2 2007-04-05T22:06 44.9
 ```
 
  1. Each line has complete information about the log it's describing and information required for processing a single log statement is not scattered in different parts of the file
@@ -57,3 +57,8 @@ mon mon-2 2007-04-05T22:08 6
 
 
     > In the sample input provided in the problem statement, if one of the lines `[<type> > <name>]` goes missing, the entire evaluation for the sensors would go wrong
+    
+---
+
+>**IMP: Since there is no importance given to order, the output printed would have the correct JSON format and evalution results but would not follow any particular order**
+---
