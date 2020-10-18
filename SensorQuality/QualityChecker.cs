@@ -1,25 +1,42 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Threading.Tasks;
 using SensorQuality.Evaluators;
 using SensorQuality.Extensions;
 using SensorQuality.Helpers;
 
 namespace SensorQuality
 {
+    /// <summary>
+    /// A class library provides methods to evaluate the quality of sensor devices
+    /// </summary>
     public class QualityChecker
     {
         private SensorEvaluationStrategy _sensorEvaluationStrategy;
         private static readonly object s_lockObj = new object();
 
+        /// <summary>
+        /// Evaluates the quality status of sensors based on the logContent and returns the result in the format
+        /// {
+        ///     "temp-1": "precise",
+        ///     "temp-2": "ultra precise",
+        ///     "hum-1": "keep",
+        ///     "hum-2": "discard",
+        ///     "mon-1": "keep",
+        ///     "mon-2": "discard"
+        /// } 
+        /// </summary>
+        /// <param name="logContentsStr"></param>
+        /// <returns></returns>
         public string EvaluateLogFile(string logContentsStr)
         {
             if (string.IsNullOrWhiteSpace(logContentsStr))
-                throw new InvalidOperationException("File contents are invalid");
+                throw new ArgumentNullException(nameof(logContentsStr));
 
             var sensorReadingsMap = new SensorReadingsMap();
 
-            foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines()) //Todo: Use Parallel.ForEach for better performance
+            foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines())
             {
                 if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))
                 {

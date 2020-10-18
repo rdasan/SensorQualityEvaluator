@@ -20,4 +20,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\SensorQuality\SensorQuality.csproj" />
+  </ItemGroup>
+
 </Project>
