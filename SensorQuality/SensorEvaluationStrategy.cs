@@ -1,6 +1,5 @@
 ﻿using System;
 using SensorQuality.Evaluators;
-using SensorQuality.Helpers;
 
 namespace SensorQuality
 {

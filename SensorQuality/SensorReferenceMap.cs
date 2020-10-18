@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SensorQuality.Helpers
+namespace SensorQuality
 {
     internal sealed class SensorReferenceMap : Dictionary<string, double>
     {
