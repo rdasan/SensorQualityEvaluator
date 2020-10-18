@@ -6,7 +6,7 @@ namespace SensorQuality.Evaluators
     internal sealed class HumidityEvaluator : IEvaluator
     {
         private readonly double _sensorReference;
-        private const double ErrorTolerance = 1;
+        private const double FaultTolerance = 1;
 
         internal HumidityEvaluator(double sensorReference)
         {
@@ -15,7 +15,7 @@ namespace SensorQuality.Evaluators
 
         public string Evaluate(List<double> readings)
         {
-            return readings.AreFaultTolerant(_sensorReference, ErrorTolerance) ? "keep" : "discard";
+            return readings.AreFaultTolerant(_sensorReference, FaultTolerance) ? "keep" : "discard";
         }
     }
 }

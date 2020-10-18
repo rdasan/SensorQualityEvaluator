@@ -6,7 +6,7 @@ namespace SensorQuality.Evaluators
     internal sealed class COMonoxideEvaluator : IEvaluator
     {
         private readonly double _sensorReference;
-        private const double ErrorTolerance = 3;
+        private const double FaultTolerance = 3;
 
         internal COMonoxideEvaluator(double sensorReference)
         {
@@ -15,7 +15,7 @@ namespace SensorQuality.Evaluators
 
         public string Evaluate(List<double> readings)
         {
-            return readings.AreFaultTolerant(_sensorReference, ErrorTolerance) ? "keep" : "discard";
+            return readings.AreFaultTolerant(_sensorReference, FaultTolerance) ? "keep" : "discard";
         }
     }
 }
