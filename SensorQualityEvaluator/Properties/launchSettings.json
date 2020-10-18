@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SensorQualityEvaluator": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\A_Files\\LogInputNew.txt"
+    }
+  }
+}
