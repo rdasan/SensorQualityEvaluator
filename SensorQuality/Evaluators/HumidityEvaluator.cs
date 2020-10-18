@@ -1,15 +1,17 @@
-﻿namespace SensorQuality.Evaluators
+﻿using System.Collections.Generic;
+
+namespace SensorQuality.Evaluators
 {
     internal class HumidityEvaluator : IEvaluator
     {
         private readonly double _sensorReference;
 
-        public HumidityEvaluator(double sensorReference)
+        internal HumidityEvaluator(double sensorReference)
         {
             _sensorReference = sensorReference;
         }
 
-        public string GetQualityStatus(double readings)
+        public string Evaluate(List<double> readings)
         {
             //ToDo: Do the actual math evaluation
             return "discard";

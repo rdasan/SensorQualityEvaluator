@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using SensorQuality.Evaluators;
 using SensorQuality.Extensions;
 
@@ -18,7 +16,7 @@ namespace SensorQuality
             if (string.IsNullOrWhiteSpace(logContentsStr))
                 throw new InvalidOperationException("File contents are invalid");
 
-            var sensorReadingsAggregate = new ConcurrentDictionary<Sensor, double>();
+            var sensorReadingsMap = new SensorReadingsMap();
             foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines()) //Todo: Use Parallel.ForEach for better performance
             {
                 if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))
@@ -31,11 +29,10 @@ namespace SensorQuality
 
                 Sensor sensor = GetSensorDevice(line);
 
-                sensorReadingsAggregate.AddOrUpdate(sensor, sensor.Reading,
-                    (key, existingReading) => existingReading + sensor.Reading);
+                sensorReadingsMap.AddReading(sensor, sensor.Reading);
             }
 
-            var evaluationResultMap = EvaluateSensors(sensorReadingsAggregate);
+            var evaluationResultMap = EvaluateSensors(sensorReadingsMap);
 
             return evaluationResultMap.IsEmpty
                 ? "Sensor Evaluation did not yield results. Reason Unknown."
@@ -45,17 +42,17 @@ namespace SensorQuality
                 });
         }
 
-        private ConcurrentDictionary<string, string> EvaluateSensors(ConcurrentDictionary<Sensor, double> sensorReadings)
+        private ConcurrentDictionary<string, string> EvaluateSensors(SensorReadingsMap sensorReadingsMap)
         {
             if (_sensorEvaluationStrategy == null)
                 throw new InvalidOperationException("Could not instantiate strategy for evaluating the sensors. Missing/Invalid reference header line");
 
             var sensorsResult = new ConcurrentDictionary<string, string>();
 
-            foreach (var (sensor, readingsAggregate) in sensorReadings) //ToDo: Use Parallel.ForEach for better performance
+            foreach (var (sensor, readings) in sensorReadingsMap)
             {
                 IEvaluator evaluator = _sensorEvaluationStrategy.GetEvaluator(sensor.Type);
-                string evaluationResult = evaluator.GetQualityStatus(readingsAggregate);
+                string evaluationResult = evaluator.Evaluate(readings);
                 sensorsResult.TryAdd(sensor.Name, evaluationResult);
             }
 

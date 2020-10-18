@@ -1,7 +1,9 @@
-﻿namespace SensorQuality.Evaluators
+﻿using System.Collections.Generic;
+
+namespace SensorQuality.Evaluators
 {
     internal interface IEvaluator
     {
-        string GetQualityStatus(double readings);
+        string Evaluate(List<double> readings);
     }
 }
