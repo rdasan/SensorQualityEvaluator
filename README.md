@@ -51,20 +51,19 @@ hum hum-2 2007-04-05T22:06 44.9
 
  1. Each line has complete information about the log it's describing and information required for processing a single log statement is not scattered in different parts of the file
  2. Since each line has complete information, the order does not matter. Log streaming from multiple distributed systems can easily flow into 1 place.
- 3. Reference line changed to specify which reference value belongs to which sensor type `[sensorType: refValue]`
-   
-     - Adding a brand new sensorType: refvalue is pretty intutive and st. forward
-     - Less error in sensorType reference values being represented just by the virtue of order. Order is a NO NO is distributed systems.
+ 3. Reference line changed to specify which reference value belongs to which sensor type `[sensorType: refValue]`. For eg:
+      ```
+      reference temp:70.0 hum:45.0 mon:6 smoke:10.2 air_quality:5.1
+      ```
+     - Adding a brand new sensorType: refvalue is pretty intutive and straight forward.
+     - Less error in sensorType reference values being represented just by the virtue of order. In the older way, change of order of reference values acn be disastrous.
  4. Don't have to worry about any packet losses or missing log lines to cause completely wrong evaluations.
-   
-
-
-    > In the sample input provided in the problem statement, if one of the lines `[<type> > <name>]` goes missing, the entire evaluation for the sensors would go wrong  
+    - In the sample input provided in the problem statement, if one of the lines `[<type> > <name>]` goes missing, the entire evaluation for the sensors would go wrong  
     
 ---
 
 >## **IMP**:  
->**Since there is no importance given to order, the output printed would have the correct JSON format and evalution results but would not follow any particular order**  
+>**Since there is no importance given to order, the output printed would have the correct JSON format and evalution results but *WOULD NOT* follow any particular order**  
 ---
 
 ## 3rd Party Components Used (Why reinvent the wheel? :) )
@@ -73,7 +72,7 @@ hum hum-2 2007-04-05T22:06 44.9
 - Extremely fast processing, and better memory performance string extension **SplitLines()** 
   -  The inbuilt string.Split() method uses pattern matching using regex which makes is slow for the specific scenario we have here where we just want to split into separate lines (pre-known separator '\r' '\n'). string.Split() also leads to a lot of allocations when the result is used in a foreach loop. Using the new ReadOnlySpan, we can avoid allocations and make the operation much faster by providing a enumerator.  
   Ref: https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm
-  - The enumeration on the result of SplitLines() is a ReadOnlySpan`<char`> which can be evaluted lazily as per need. So no pre-allocation of memory.  
+  - The enumeration on the result of SplitLines() is a ReadOnlySpan`<char`> which can be obtained by lazy evaluation as per need. So no pre-allocation of memory.  
 
 ## Assumptions:
 - The first line of the logContents is always the reference line
