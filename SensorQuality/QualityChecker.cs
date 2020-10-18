@@ -7,7 +7,8 @@ namespace SensorQuality
 {
     public class QualityChecker
     {
-        private SensorEvaluationStrategy _sensorEvaluationStrategy = null;
+        private SensorEvaluationStrategy _sensorEvaluationStrategy;
+        private static object lockObj = new object();
 
         public string EvaluateLogFile(string logContentsStr)
         {
@@ -19,15 +20,13 @@ namespace SensorQuality
             {
                 if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))
                 {
-                    //Set up the SensorEvaluationStrategy using the first reference line
-                    _sensorEvaluationStrategy = new SensorEvaluationStrategy(line.ToString());
+                    //Set up the SensorEvaluationStrategy using the line that has the "reference" info
+                    //and immediately move to the next line
+                    _sensorEvaluationStrategy = BuildSensorEvaluationStrategy(line);
                     continue;
                 }
 
-                var sensor = GetSensorDevice(line);
-
-                //if(!_sensorEvaluationStrategy.ContainsKey(sensor.Type))
-                //    throw new InvalidOperationException($"No reference value provided for sensor type {sensor.Type}");
+                Sensor sensor = GetSensorDevice(line);
 
                 sensorReadings.AddOrUpdate(sensor, sensor.Reading,
                     (key, existingReading) => existingReading + sensor.Reading);
@@ -36,6 +35,22 @@ namespace SensorQuality
             string evaluationResult = EvaluateSensors(sensorReadings);
 
             return string.Empty;
+        }
+
+        private SensorEvaluationStrategy BuildSensorEvaluationStrategy(ReadOnlySpan<char> line)
+        {
+            if(_sensorEvaluationStrategy != null)
+                throw new InvalidOperationException($"Sensor evaluation references already initialized. Duplicate reference line found {line.ToString()}");
+
+            if (_sensorEvaluationStrategy == null)
+            {
+                lock (lockObj)
+                {
+                    _sensorEvaluationStrategy ??= new SensorEvaluationStrategy(line.ToString());
+                }
+            }
+
+            return _sensorEvaluationStrategy;
         }
 
         private string EvaluateSensors(ConcurrentDictionary<Sensor, double> sensorReadings)
@@ -52,6 +67,7 @@ namespace SensorQuality
                 sensorsResult.TryAdd(sensor.Name, evaluationResult);
             }
 
+            return string.Empty;
         }
 
 
