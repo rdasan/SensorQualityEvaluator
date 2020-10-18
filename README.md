@@ -50,8 +50,8 @@ mon mon-2 2007-04-05T22:08 6
  2. Since each line has complete information, the order does not matter. Log streaming from multiple distributed systems can easily flow into 1 place.
  3. Reference line changed to specify whi reference value belongs to which sensor type `[sensorType: refValue]`
    
-           - Adding a new sensorType: refvalue is pretty intutive and st. forward
-           - Less error in order of values being represented just by the virtue   of order. Order is a NO NO is distributed systems.
+     - Adding a new sensorType: refvalue is pretty intutive and st. forward
+     - Less error in order of values being represented just by the virtue of order. Order is a NO NO is distributed systems.
  4. Don't have to worry about any packet losses or missing log lines to cause completely wrong evaluations.
    
 
