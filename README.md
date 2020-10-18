@@ -4,7 +4,7 @@
 
 Process the log file and automate the quality control evaluation based on pre-defined criteria in a controlled environment
 
-## Design Changes made in consideration of extendablity, maintainablity and distributed modelling
+## Design Changes made in consideration of **Extendablity**, **Maintainablity** and **Distributed Modeling**
 
 I made the following changes to the format of the log file
 
@@ -62,3 +62,10 @@ hum hum-2 2007-04-05T22:06 44.9
 
 >**IMP: Since there is no importance given to order, the output printed would have the correct JSON format and evalution results but would not follow any particular order**
 ---
+
+## 3rd Party Components Used (Why reinvent the wheel? :) )
+
+- MathNet.Numerics nuget package (https://numerics.mathdotnet.com/)
+- Extremely fast processing, and better memory performance string extension **SplitLines()** 
+  -  The inbuilt string.Split() method uses pattern matching using regex which makes is slow for the specific scenario we have here where we just want to split into separate lines (pre-known separator '\r' '\n'). string.Split() also leads to a lot of allocations when the result is used in a foreach loop. Using the new ReadOnlySpan, we can avoid allocations and make the operation much faster by providing a enumerator. \
+  Ref: https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm
