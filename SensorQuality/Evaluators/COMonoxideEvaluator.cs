@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using SensorQuality.Extensions;
 
 namespace SensorQuality.Evaluators
 {
-    internal class COMonoxideEvaluator : IEvaluator
+    internal sealed class COMonoxideEvaluator : IEvaluator
     {
         private readonly double _sensorReference;
+        private const double ErrorTolerance = 3;
 
         internal COMonoxideEvaluator(double sensorReference)
         {
@@ -13,8 +15,7 @@ namespace SensorQuality.Evaluators
 
         public string Evaluate(List<double> readings)
         {
-            //ToDo: Do the actual math evaluation
-            return "discard";
+            return readings.AreFaultTolerant(_sensorReference, ErrorTolerance) ? "keep" : "discard";
         }
     }
 }

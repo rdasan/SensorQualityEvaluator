@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using SensorQuality.Extensions;
 
 namespace SensorQuality.Evaluators
 {
-    internal class HumidityEvaluator : IEvaluator
+    internal sealed class HumidityEvaluator : IEvaluator
     {
         private readonly double _sensorReference;
+        private const double ErrorTolerance = 1;
 
         internal HumidityEvaluator(double sensorReference)
         {
@@ -13,8 +15,7 @@ namespace SensorQuality.Evaluators
 
         public string Evaluate(List<double> readings)
         {
-            //ToDo: Do the actual math evaluation
-            return "discard";
+            return readings.AreFaultTolerant(_sensorReference, ErrorTolerance) ? "keep" : "discard";
         }
     }
 }

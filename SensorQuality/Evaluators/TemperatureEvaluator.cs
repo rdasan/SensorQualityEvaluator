@@ -2,7 +2,7 @@
 
 namespace SensorQuality.Evaluators
 {
-    internal class TemperatureEvaluator : IEvaluator
+    internal sealed class TemperatureEvaluator : IEvaluator
     {
         private readonly double _sensorReference;
 
