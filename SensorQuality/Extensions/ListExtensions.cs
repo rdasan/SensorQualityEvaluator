@@ -15,5 +15,10 @@ namespace SensorQuality.Extensions
 
             return true;
         }
+
+        internal static bool IsValid(this List<double> readings)
+        {
+            return readings != null && readings.Count != 0;
+        }
     }
 }

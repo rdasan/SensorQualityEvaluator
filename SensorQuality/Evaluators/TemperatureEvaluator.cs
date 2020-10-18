@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MathNet.Numerics.Statistics;
+using SensorQuality.Extensions;
 
 namespace SensorQuality.Evaluators
 {
@@ -19,16 +20,19 @@ namespace SensorQuality.Evaluators
 
         public string Evaluate(List<double> readings)
         {
+            if (!readings.IsValid())
+                return "No valid readings provided";
+
             var mean = readings.Average();
 
             if (Math.Abs(_sensorReference - mean) < MeanFaultTolerance &&
-                readings.StandardDeviation() < UltraPreciseStdDevTolerance)
+                readings.PopulationStandardDeviation() < UltraPreciseStdDevTolerance)
             {
                 return "ultra precise";
             }
 
             if (Math.Abs(_sensorReference - mean) < MeanFaultTolerance &&
-                readings.StandardDeviation() < VeryPreciseStdDevTolerance)
+                readings.PopulationStandardDeviation() < VeryPreciseStdDevTolerance)
             {
                 return "very precise";
             }

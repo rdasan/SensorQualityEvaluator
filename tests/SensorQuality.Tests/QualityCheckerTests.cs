@@ -71,12 +71,10 @@ temp temp-2 2007-04-05T22:02 70.1";
             string inputLogContents = 
                 @"reference temp:70.0 hum:45.0 mon:6
 ";
-
             QualityChecker qualityChecker = new QualityChecker();
             var result = qualityChecker.EvaluateLogFileContents(inputLogContents);
 
             result.Should().Be("Sensor Evaluation did not yield results.");
-
         }
 
         [Fact]
