@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using SensorQuality.Evaluators;
 using SensorQuality.Extensions;
+using SensorQuality.Helpers;
 
 namespace SensorQuality
 {
@@ -17,6 +18,7 @@ namespace SensorQuality
                 throw new InvalidOperationException("File contents are invalid");
 
             var sensorReadingsMap = new SensorReadingsMap();
+
             foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines()) //Todo: Use Parallel.ForEach for better performance
             {
                 if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))

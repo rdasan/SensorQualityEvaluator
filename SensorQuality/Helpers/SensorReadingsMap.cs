@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace SensorQuality.Evaluators
+namespace SensorQuality.Helpers
 {
     internal class SensorReadingsMap : ConcurrentDictionary<Sensor, List<double>>
     {
