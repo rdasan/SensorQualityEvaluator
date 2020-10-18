@@ -27,35 +27,37 @@ namespace SensorQuality
         /// </summary>
         /// <param name="logContentsStr"></param>
         /// <returns></returns>
-        public string EvaluateLogFile(string logContentsStr)
+        public string EvaluateLogFileContents(string logContentsStr)
         {
             if (string.IsNullOrWhiteSpace(logContentsStr))
                 throw new ArgumentNullException(nameof(logContentsStr));
 
             var sensorReadingsMap = new SensorReadingsMap();
 
-            int index = logContentsStr.IndexOfAny(new[] {'\r', '\n'});
+            int index = logContentsStr.IndexOf(Environment.NewLine, StringComparison.InvariantCulture);
             string referenceLine = GetReferenceLine(logContentsStr, index);
 
             //Set up the SensorEvaluationStrategy using the line that has the "reference" info
-            _sensorEvaluationStrategy = BuildSensorEvaluationStrategy(referenceLine);
+            _sensorEvaluationStrategy = new SensorEvaluationStrategy(referenceLine);
 
             //We no longer need the first reference line. So get rid of it from the logContents
-            string logContents = logContentsStr.Substring(index + 2);
+            string logContents = logContentsStr.Substring(index + 1);
 
             //Using a Custom string.SplitLines() extension method to save unnecessary memory allocation
             //Please see more details in Extensions.StringExtensions.cs or ReadMe.md
             foreach (ReadOnlySpan<char> line in logContents.SplitLines())
             {
-                Sensor sensor = GetSensor(line);
-
-                sensorReadingsMap.AddReading(sensor, sensor.Reading);
+                if (!line.IsEmpty)//Skipping empty lines if any
+                {
+                    Sensor sensor = GetSensor(line);
+                    sensorReadingsMap.AddReading(sensor, sensor.Reading);
+                }
             }
 
             var evaluationResultMap = EvaluateSensors(sensorReadingsMap);
 
             return evaluationResultMap.IsEmpty
-                ? "Sensor Evaluation did not yield results. Reason Unknown."
+                ? "Sensor Evaluation did not yield results."
                 : JsonSerializer.Serialize(evaluationResultMap, new JsonSerializerOptions
                 {
                     WriteIndented = true
@@ -112,17 +114,6 @@ namespace SensorQuality
                 sensorInfo.Reading = reading;
 
             return sensorInfo;
-        }
-
-        private SensorEvaluationStrategy BuildSensorEvaluationStrategy(ReadOnlySpan<char> line)
-        {
-            if (_sensorEvaluationStrategy != null)
-                throw new InvalidOperationException(
-                    $"Sensor evaluation references already initialized. Duplicate reference line found {line.ToString()}");
-
-            _sensorEvaluationStrategy ??= new SensorEvaluationStrategy(line.ToString());
-              
-            return _sensorEvaluationStrategy;
         }
     }
 }

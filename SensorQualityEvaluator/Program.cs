@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using SensorQuality;
@@ -15,7 +14,6 @@ namespace SensorQualityEvaluator
 
         static async Task<int> Main(string[] args)
         {
-            var sw = Stopwatch.StartNew();
             //The first command line argument should be the file path
             if (args.Length < 1)
             {
@@ -35,12 +33,9 @@ namespace SensorQualityEvaluator
                 var samplingContent = await File.ReadAllTextAsync(samplingFilePath);
 
                 QualityChecker qualityChecker = new QualityChecker();
-                string sensorQualityReport = qualityChecker.EvaluateLogFile(samplingContent);
+                string sensorQualityReport = qualityChecker.EvaluateLogFileContents(samplingContent);
 
                 Console.WriteLine(sensorQualityReport);
-
-                sw.Stop();
-                Console.WriteLine(sw.ElapsedMilliseconds);
 
                 return SuccessCode;
             }

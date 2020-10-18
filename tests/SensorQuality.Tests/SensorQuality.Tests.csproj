@@ -24,4 +24,10 @@
     <ProjectReference Include="..\..\SensorQuality\SensorQuality.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="LogSample.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
