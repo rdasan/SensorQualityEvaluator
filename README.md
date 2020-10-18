@@ -82,3 +82,4 @@ hum hum-2 2007-04-05T22:06 44.9
 ## Areas of improvement
 - The threshold values for fault tolerance, standard deviation etc. can be moved to a config file and read from there instaed of hardcoded values
 - The performance for evaluating the "Humidistats" and "CO Detectors" can be further improved. Right now all the readings of a particular humidistat or CO detector are being read into memory and then evaluated. But that can be avoided by doing inline evalution for those readings as they are being read and stop processing the readings as soon as a deviation from threshold is encountered.
+- More Validations and Error Checking.
