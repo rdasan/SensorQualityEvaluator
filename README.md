@@ -69,3 +69,4 @@ hum hum-2 2007-04-05T22:06 44.9
 - Extremely fast processing, and better memory performance string extension **SplitLines()** 
   -  The inbuilt string.Split() method uses pattern matching using regex which makes is slow for the specific scenario we have here where we just want to split into separate lines (pre-known separator '\r' '\n'). string.Split() also leads to a lot of allocations when the result is used in a foreach loop. Using the new ReadOnlySpan, we can avoid allocations and make the operation much faster by providing a enumerator. \
   Ref: https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm
+  - The enumeration on the result of SplitLines() is a ReadOnlySpan`<char`> which can be evaluted lazily as per need. So no pre-allocation of memory.
