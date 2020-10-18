@@ -17,11 +17,11 @@ namespace SensorQuality
             switch (sensorType)
             {
                 case "temp":
-                    return new TemperatureEvaluator();
+                    return new TemperatureEvaluator(_sensorReferenceMap[sensorType]);
                 case "hum":
-                    return new HumidityEvaluator();
+                    return new HumidityEvaluator(_sensorReferenceMap[sensorType]);
                 case "mon":
-                    return new COMonoxideEvaluator();
+                    return new COMonoxideEvaluator(_sensorReferenceMap[sensorType]);
                 default:
                     throw new InvalidOperationException($"Unknown Sensor Type: {sensorType}");
                     
