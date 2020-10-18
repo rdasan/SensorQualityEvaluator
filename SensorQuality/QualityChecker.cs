@@ -7,26 +7,10 @@ using SensorQuality.Extensions;
 
 namespace SensorQuality
 {
-    /// <summary>
-    /// A class providing methods to evaluate the quality of sensor devices
-    /// </summary>
-    public class QualityChecker
+    public class QualityChecker : IQualityChecker
     {
         private SensorEvaluationStrategy _sensorEvaluationStrategy;
 
-        /// <summary>
-        /// Evaluates the quality status of sensors based on the logContent and returns the result in the format
-        /// {
-        ///     "temp-1": "precise",
-        ///     "temp-2": "ultra precise",
-        ///     "hum-1": "keep",
-        ///     "hum-2": "discard",
-        ///     "mon-1": "keep",
-        ///     "mon-2": "discard"
-        /// } 
-        /// </summary>
-        /// <param name="logContentsStr"></param>
-        /// <returns></returns>
         public string EvaluateLogFileContents(string logContentsStr)
         {
             if (string.IsNullOrWhiteSpace(logContentsStr))

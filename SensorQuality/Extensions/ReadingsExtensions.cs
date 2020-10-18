@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SensorQuality.Extensions
 {
-    internal static class ListExtensions
+    internal static class ReadingsExtensions
     {
-        internal static bool AreFaultTolerant(this List<double> readings, double referenceValue, double faultTolerance)
+        internal static bool AreFaultTolerant(this IEnumerable<double> readings, double referenceValue, double faultTolerance)
         {
             foreach (var reading in readings)
             {
@@ -16,9 +17,9 @@ namespace SensorQuality.Extensions
             return true;
         }
 
-        internal static bool IsValid(this List<double> readings)
+        internal static bool IsValid(this IEnumerable<double> readings)
         {
-            return readings != null && readings.Count != 0;
+            return readings != null && readings.Count() != 0;
         }
     }
 }

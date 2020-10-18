@@ -13,7 +13,7 @@ namespace SensorQuality.Tests.Evaluators
         public void Evaluate_Results_In_Precise()
         {
             var tempEvaluator = new TemperatureEvaluator(ReferenceValue);
-            var readings = new List<double> {72.4, 76.0, 79.1, 75.6, 71.2, 71.4, 69.2, 65.2, 62.8};
+            var readings = new [] {72.4, 76.0, 79.1, 75.6, 71.2, 71.4, 69.2, 65.2, 62.8};
 
             var sensorQuality = tempEvaluator.Evaluate(readings);
 
@@ -24,7 +24,7 @@ namespace SensorQuality.Tests.Evaluators
         public void Evaluate_Results_In_UltraPrecise()
         {
             var tempEvaluator = new TemperatureEvaluator(ReferenceValue);
-            var readings = new List<double> { 69.5, 70.1, 71.3, 71.5, 69.8 };
+            var readings = new [] { 69.5, 70.1, 71.3, 71.5, 69.8 };
 
             var sensorQuality = tempEvaluator.Evaluate(readings);
 
@@ -35,7 +35,7 @@ namespace SensorQuality.Tests.Evaluators
         public void Evaluate_Results_In_VeryPrecise()
         {
             var tempEvaluator = new TemperatureEvaluator(ReferenceValue);
-            var readings = new List<double> {60.0,70.4,72,69.8,72,69.7,70.2,75};
+            var readings = new [] {60.0,70.4,72,69.8,72,69.7,70.2,75};
 
             var sensorQuality = tempEvaluator.Evaluate(readings);
 
@@ -46,7 +46,7 @@ namespace SensorQuality.Tests.Evaluators
         public void Evaluate_Results_In_Empty()
         {
             var tempEvaluator = new TemperatureEvaluator(ReferenceValue);
-            var readings = new List<double> {  };
+            var readings = new List<double>();
 
             var sensorQuality = tempEvaluator.Evaluate(readings);
 
