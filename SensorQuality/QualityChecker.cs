@@ -19,7 +19,7 @@ namespace SensorQuality
                 throw new InvalidOperationException("File contents are invalid");
 
             var sensorReadingsAggregate = new ConcurrentDictionary<Sensor, double>();
-            foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines())
+            foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines()) //Todo: Use Parallel.ForEach for better performance
             {
                 if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))
                 {
@@ -52,7 +52,7 @@ namespace SensorQuality
 
             var sensorsResult = new ConcurrentDictionary<string, string>();
 
-            foreach (var (sensor, readingsAggregate) in sensorReadings)
+            foreach (var (sensor, readingsAggregate) in sensorReadings) //ToDo: Use Parallel.ForEach for better performance
             {
                 IEvaluator evaluator = _sensorEvaluationStrategy.GetEvaluator(sensor.Type);
                 string evaluationResult = evaluator.GetQualityStatus(readingsAggregate);
