@@ -12,7 +12,7 @@ namespace SensorQualityEvaluator
         private const int SuccessCode = 0;
         private const int FailureCode = 1;
 
-        static async Task<int> Main(string[] args)
+        internal static async Task<int> Main(string[] args)
         {
             //The first command line argument should be the file path
             if (args.Length < 1)
@@ -28,15 +28,18 @@ namespace SensorQualityEvaluator
                 return FailureCode;
             }
 
+            var samplingContent = await File.ReadAllTextAsync(samplingFilePath);
+
+            return await EvaluateLogFile(samplingFilePath, new QualityChecker());
+        }
+
+        internal static async Task<int> EvaluateLogFile(string samplingContent, IQualityChecker qualityChecker)
+        {
             try
             {
-                var samplingContent = await File.ReadAllTextAsync(samplingFilePath);
-
-                QualityChecker qualityChecker = new QualityChecker();
-                string sensorQualityReport = qualityChecker.EvaluateLogFile(samplingContent);
+                string sensorQualityReport = qualityChecker.EvaluateLogFileContents(samplingContent);
 
                 Console.WriteLine(sensorQualityReport);
-
                 return SuccessCode;
             }
             catch (Exception ex)
@@ -46,12 +49,12 @@ namespace SensorQualityEvaluator
             }
         }
 
-        public static async Task LogExceptionAsync(Exception exception)
+        private static async Task LogExceptionAsync(Exception exception)
         {
             await LogErrorAsync($"{exception}", "EXCEPTION");
         }
 
-        public static async Task LogErrorAsync(string message, string errorType = "ERROR")
+        private static async Task LogErrorAsync(string message, string errorType = "ERROR")
         {
             //If we have other log providers like NLog, Serilog, we can log to them here
             await Console.Error.WriteLineAsync($"{errorType} {DateTime.UtcNow} Application: SensorQualityEvaluator, message: {message}");

@@ -1,47 +1,63 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Threading.Tasks;
 using SensorQuality.Evaluators;
 using SensorQuality.Extensions;
-using SensorQuality.Helpers;
 
 namespace SensorQuality
 {
-    public class QualityChecker
+    public class QualityChecker : IQualityChecker
     {
         private SensorEvaluationStrategy _sensorEvaluationStrategy;
-        private static readonly object s_lockObj = new object();
 
-        public string EvaluateLogFile(string logContentsStr)
+        public string EvaluateLogFileContents(string logContentsStr)
         {
             if (string.IsNullOrWhiteSpace(logContentsStr))
-                throw new InvalidOperationException("File contents are invalid");
+                throw new ArgumentNullException(nameof(logContentsStr));
 
             var sensorReadingsMap = new SensorReadingsMap();
 
-            foreach (ReadOnlySpan<char> line in logContentsStr.SplitLines()) //Todo: Use Parallel.ForEach for better performance
+            int index = logContentsStr.IndexOf(Environment.NewLine, StringComparison.InvariantCulture);
+            string referenceLine = GetReferenceLine(logContentsStr, index);
+
+            //Set up the SensorEvaluationStrategy using the line that has the "reference" info
+            _sensorEvaluationStrategy = new SensorEvaluationStrategy(referenceLine);
+
+            //We no longer need the first reference line. So get rid of it from the logContents
+            string logContents = logContentsStr.Substring(index + 1);
+
+            //Using a Custom string.SplitLines() extension method to save unnecessary memory allocation
+            //Please see more details in Extensions.StringExtensions.cs or ReadMe.md
+            foreach (ReadOnlySpan<char> line in logContents.SplitLines())
             {
-                if (line.StartsWith("reference", StringComparison.OrdinalIgnoreCase))
+                if (!line.IsEmpty)//Skipping empty lines if any
                 {
-                    //Set up the SensorEvaluationStrategy using the line that has the "reference" info
-                    //and immediately move to the next line
-                    _sensorEvaluationStrategy = BuildSensorEvaluationStrategy(line);
-                    continue;
+                    Sensor sensor = GetSensor(line);
+                    sensorReadingsMap.AddReading(sensor, sensor.Reading);
                 }
-
-                Sensor sensor = GetSensor(line);
-
-                sensorReadingsMap.AddReading(sensor, sensor.Reading);
             }
 
             var evaluationResultMap = EvaluateSensors(sensorReadingsMap);
 
             return evaluationResultMap.IsEmpty
-                ? "Sensor Evaluation did not yield results. Reason Unknown."
+                ? "Sensor Evaluation did not yield results."
                 : JsonSerializer.Serialize(evaluationResultMap, new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
+        }
+
+        private static string GetReferenceLine(string logContentsStr, int index)
+        {
+            string referenceLine = index != -1
+                ? logContentsStr.Substring(0, index)
+                : throw new InvalidOperationException("Input log contents not formatted correctly with spaces");
+
+            if (!referenceLine.StartsWith("reference"))
+                throw new InvalidOperationException(
+                    $"Reference line not provided. First line in log contents is: '{referenceLine}'");
+            return referenceLine;
         }
 
         private  ConcurrentDictionary<string, string> EvaluateSensors(SensorReadingsMap sensorReadingsMap)
@@ -51,12 +67,15 @@ namespace SensorQuality
 
             var sensorsResult = new ConcurrentDictionary<string, string>();
 
-            foreach (var (sensor, readings) in sensorReadingsMap)
+            //For the provided example sample and level of complexity of calculations,
+            //Parallel.ForEach is not required. But concurrency might yield results faster for real life scenarios
+            //with huge data sets and complex mathematical evaluations. (Need to consider it case by case)
+            Parallel.ForEach(sensorReadingsMap, (sensorReadingsMapItem) =>
             {
-                IEvaluator evaluator = _sensorEvaluationStrategy.GetEvaluator(sensor.Type);
-                string evaluationResult = evaluator.Evaluate(readings);
-                sensorsResult.TryAdd(sensor.Name, evaluationResult);
-            }
+                IEvaluator evaluator = _sensorEvaluationStrategy.GetEvaluator(sensorReadingsMapItem.Key.Type);
+                string evaluationResult = evaluator.Evaluate(sensorReadingsMapItem.Value);
+                sensorsResult.TryAdd(sensorReadingsMapItem.Key.Name, evaluationResult);
+            });
 
             return sensorsResult;
         }
@@ -79,23 +98,6 @@ namespace SensorQuality
                 sensorInfo.Reading = reading;
 
             return sensorInfo;
-        }
-
-        private SensorEvaluationStrategy BuildSensorEvaluationStrategy(ReadOnlySpan<char> line)
-        {
-            if (_sensorEvaluationStrategy != null)
-                throw new InvalidOperationException(
-                    $"Sensor evaluation references already initialized. Duplicate reference line found {line.ToString()}");
-
-            if (_sensorEvaluationStrategy == null)
-            {
-                lock (s_lockObj)
-                {
-                    _sensorEvaluationStrategy ??= new SensorEvaluationStrategy(line.ToString());
-                }
-            }
-
-            return _sensorEvaluationStrategy;
         }
     }
 }

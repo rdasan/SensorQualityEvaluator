@@ -13,8 +13,11 @@ namespace SensorQuality.Evaluators
             _sensorReference = sensorReference;
         }
 
-        public string Evaluate(List<double> readings)
+        public string Evaluate(IEnumerable<double> readings)
         {
+            if (!readings.IsValid())
+                return "No valid readings provided";
+
             return readings.AreFaultTolerant(_sensorReference, FaultTolerance) ? "keep" : "discard";
         }
     }

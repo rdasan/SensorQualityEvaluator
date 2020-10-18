@@ -1,18 +1,20 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace SensorQuality.Helpers
+namespace SensorQuality
 {
-    internal class SensorReadingsMap : ConcurrentDictionary<Sensor, List<double>>
+    internal class SensorReadingsMap : ConcurrentDictionary<Sensor, IEnumerable<double>>
     {
         internal void AddReading(Sensor sensor, double reading)
         {
             if (ContainsKey(sensor))
             {
-                List<double> list = this[sensor];
+                var list = this[sensor];
                 if (!list.Contains(reading))
                 {
-                    list.Add(reading);
+                    var updatedList = list.Append(reading);
+                    TryUpdate(sensor, updatedList, list);
                 }
             }
             else

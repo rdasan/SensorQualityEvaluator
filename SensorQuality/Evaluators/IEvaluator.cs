@@ -4,6 +4,6 @@ namespace SensorQuality.Evaluators
 {
     internal interface IEvaluator
     {
-        string Evaluate(List<double> readings);
+        string Evaluate(IEnumerable<double> readings);
     }
 }
