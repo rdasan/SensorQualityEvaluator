@@ -6,7 +6,7 @@ Process the log file and automate the quality control evaluation based on pre-de
 
 ## Design Changes made in consideration of **Extendablity**, **Maintainablity** and **Distributed Modeling**
 
-I made the following changes to the format of the log file
+### I made the following changes to the format of the log file
 
 ```
 reference temp:70.0 hum:45.0 mon:6
