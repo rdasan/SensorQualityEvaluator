@@ -35,21 +35,16 @@ namespace SensorQuality
             var sensorReadingsMap = new SensorReadingsMap();
 
             int index = logContentsStr.IndexOfAny(new[] {'\r', '\n'});
-            string referenceLine = index != -1
-                ? logContentsStr.Substring(0, index)
-                : throw new InvalidOperationException("Input log contents not formatted correctly with spaces");
-
-            if(!referenceLine.StartsWith("reference"))
-                throw new InvalidOperationException("Reference line not provided");
+            string referenceLine = GetReferenceLine(logContentsStr, index);
 
             //Set up the SensorEvaluationStrategy using the line that has the "reference" info
             _sensorEvaluationStrategy = BuildSensorEvaluationStrategy(referenceLine);
 
-            //We no longer need the first line. So get rid of it from the logContents
+            //We no longer need the first reference line. So get rid of it from the logContents
             string logContents = logContentsStr.Substring(index + 2);
 
             //Using a Custom string.SplitLines() extension method to save unnecessary memory allocation
-            //Please see more details in Extensions.StringExtensions.cs or ReadMe
+            //Please see more details in Extensions.StringExtensions.cs or ReadMe.md
             foreach (ReadOnlySpan<char> line in logContents.SplitLines())
             {
                 Sensor sensor = GetSensor(line);
@@ -65,6 +60,18 @@ namespace SensorQuality
                 {
                     WriteIndented = true
                 });
+        }
+
+        private static string GetReferenceLine(string logContentsStr, int index)
+        {
+            string referenceLine = index != -1
+                ? logContentsStr.Substring(0, index)
+                : throw new InvalidOperationException("Input log contents not formatted correctly with spaces");
+
+            if (!referenceLine.StartsWith("reference"))
+                throw new InvalidOperationException(
+                    $"Reference line not provided. First line in log contents is: '{referenceLine}'");
+            return referenceLine;
         }
 
         private  ConcurrentDictionary<string, string> EvaluateSensors(SensorReadingsMap sensorReadingsMap)
