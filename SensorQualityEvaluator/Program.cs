@@ -30,7 +30,7 @@ namespace SensorQualityEvaluator
 
             var samplingContent = await File.ReadAllTextAsync(samplingFilePath);
 
-            return await EvaluateLogFile(samplingFilePath, new QualityChecker());
+            return await EvaluateLogFile(samplingContent, new QualityChecker());
         }
 
         internal static async Task<int> EvaluateLogFile(string samplingContent, IQualityChecker qualityChecker)
